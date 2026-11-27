@@ -5,5 +5,6 @@
   "main": "",
   "author": "",
   "license": "AGPL-3.0-only",
+  "modelVersion": "26.0.0",
   "dependencies": {}
 }
