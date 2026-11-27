@@ -1,0 +1,13 @@
+{
+  "name": "tvbox-ohos",
+  "version": "1.0.0",
+  "description": "TVBoxOS HarmonyOS 7 porting skeleton",
+  "main": "",
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hvigor": "5.0.0",
+    "@ohos/hvigor-ohos-plugin": "5.0.0"
+  }
+}

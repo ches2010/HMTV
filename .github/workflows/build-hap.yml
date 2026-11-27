@@ -1,0 +1,69 @@
+name: Build HarmonyOS HAP
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-hap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev
+
+      - name: Setup Huawei HarmonyOS Command Line Tools
+        uses: wm-develop/setup-ohos@v3
+        with:
+          version: 26.0.0.821
+          cache: true
+
+      - name: Verify toolchain
+        run: |
+          hvigorw -v
+          ohpm -v
+          echo "HOS_SDK_HOME=$HOS_SDK_HOME"
+
+      - name: Install ohpm dependencies
+        run: ohpm install
+
+      - name: Build HAP (debug)
+        env:
+          JAVA_TOOL_OPTIONS: "-Duser.country=CN -Duser.language=zh"
+        run: |
+          hvigorw --mode module -p product=default -p buildMode=debug assembleHap --no-daemon --accept-license
+
+      - name: Locate HAP
+        id: hap
+        run: |
+          HAP=$(find entry/build -type f -name '*.hap' | head -n 1)
+          test -n "$HAP" || { echo "No HAP produced"; exit 1; }
+          echo "path=$HAP" >> "$GITHUB_OUTPUT"
+          echo "Built: $HAP"
+
+      - name: Upload HAP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmtv-hap
+          path: ${{ steps.hap.outputs.path }}
+          if-no-files-found: error
+          retention-days: 30

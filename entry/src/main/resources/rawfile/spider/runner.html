@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"></head><body>
+<script>
+window.__spiderApi = null;
+window.__installSpider = function (script, ext) {
+  try { (0, eval)(script); } catch (e) { window.TVBoxBridge.log('install error: ' + e.message); }
+  var legacy = window.VOD || {};
+  var api = window.TVBoxSpider || {};
+  function pick(name) { return api[name] || legacy[name] || null; }
+  window.__spiderApi = {
+    init: function () { if (typeof legacy.init === 'function') legacy.init(ext); if (typeof api.init === 'function') api.init(ext); },
+    homeContent: function (filter) { var f = pick('home'); return f ? f(filter) : '{}'; },
+    homeVideoContent: function () { var f = pick('homeVideo'); return f ? f() : '{}'; },
+    categoryContent: function (tid, pg, filter, extend) { var f = pick('category'); return f ? f(tid, pg, filter, extend || {}) : '{}'; },
+    detailContent: function (ids) { var f = pick('detail'); return f ? f(ids) : '{}'; },
+    searchContent: function (key, quick, pg) { var f = pick('search'); return f ? f(key, quick, pg) : '{}'; },
+    playerContent: function (flag, id, vipFlags) { var f = pick('play'); return f ? f(flag, id, vipFlags || []) : '{}'; },
+    liveContent: function (url) { var f = pick('live'); return f ? f(url) : '{}'; }
+  };
+  window.__spiderApi.init();
+  return true;
+};
+window.__callSpider = async function (method, args) {
+  if (!window.__spiderApi) return '{}';
+  var f = window.__spiderApi[method];
+  if (typeof f !== 'function') return '{}';
+  try {
+    var r = await f.apply(window.__spiderApi, args);
+    return typeof r === 'string' ? r : JSON.stringify(r);
+  } catch (e) {
+    window.TVBoxBridge.log(method + ' error: ' + e.message);
+    return '{}';
+  }
+};
+// legacy cat.js 常用 JSAPI 兼容层：req/fetch -> TVBoxBridge.fetch
+window.req = async function (url, opts) {
+  var r = JSON.parse(await window.TVBoxBridge.fetch(url, JSON.stringify(opts || {})));
+  return { code: r.status, content: r.body };
+};
+</script>
+</body></html>
