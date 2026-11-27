@@ -1,5 +1,6 @@
 import { http } from '@kit.NetworkKit';
 import { SpiderContract } from './SpiderContract';
+import { networkPolicy } from '../config/NetworkPolicy';
 
 // 对应 TVBox 配置 type=1(json)/0(xml)/4(remote) 的通用 HTTP JSON 采集接口。
 export class HttpSpider implements SpiderContract {
@@ -10,10 +11,12 @@ export class HttpSpider implements SpiderContract {
 
  private async get(extra: string): Promise<string> {
     const sep = this.api_.includes('?') ? '&' : '?';
+    const rewritten = await networkPolicy.rewrite(this.api_ + sep + extra);
     const req = http.createHttp();
     try {
-      const res = await req.request(this.api_ + sep + extra, {
+      const res = await req.request(rewritten.url, {
         method: http.RequestMethod.GET,
+        header: rewritten.headers,
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 15000,
         readTimeout: 15000

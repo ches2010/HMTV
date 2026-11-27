@@ -1,5 +1,6 @@
 import { http } from '@kit.NetworkKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { networkPolicy } from '../config/NetworkPolicy';
 
 // 注入到 ArkWeb 的 JSAPI；只暴露必要方法，禁止 file:// 与本地文件访问。
 export class JsBridge {
@@ -31,8 +32,10 @@ export class JsBridge {
         if (opt.headers) header = opt.headers as Record<string, string>;
         if (opt.body) body = opt.body as string;
       }
+      const rewritten = await networkPolicy.rewrite(url);
+      for (const k of Object.keys(rewritten.headers)) { header[k] = rewritten.headers[k]; }
       const req = http.createHttp();
-      const res = await req.request(url, {
+      const res = await req.request(rewritten.url, {
         method: method,
         header: header,
         extraData: body,

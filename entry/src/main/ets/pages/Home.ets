@@ -1,5 +1,6 @@
 import { router } from '@kit.ArkUI';
 import { ConfigStore } from '../config/ConfigStore';
+import { networkPolicy } from '../config/NetworkPolicy';
 import { SiteBean } from '../model/SiteConfig';
 import { VodItem, VodClass } from '../model/Vod';
 import { VodParser } from '../model/VodParser';
@@ -23,7 +24,9 @@ struct Home {
 
  async aboutToAppear(): Promise<void> {
     await this.store.init(this.getUIContext().getHostContext()!);
-    const cfg = this.store.parseConfig(await this.store.getRawConfig());
+    const raw = await this.store.getRawConfig();
+    networkPolicy.configure(raw);
+    const cfg = this.store.parseConfig(raw);
     this.sites = cfg.sites || [];
     if (this.sites.length > 0) this.loadHome();
  }
@@ -56,7 +59,8 @@ struct Home {
       this.videos = VodParser.parseList(json).list;
       this.status = this.videos.length > 0 ? '已加载 ' + this.videos.length + ' 条' : '首页无数据，可尝试分类';
     } catch (e) {
-      this.status = '加载失败：' + (e as Error).message;
+      const site = this.currentSite();
+      this.status = '加载失败：' + (e as Error).message + (site ? ' @ ' + site.api : '') + '（检查 hosts/doh 或网络）';
     }
   }
 
