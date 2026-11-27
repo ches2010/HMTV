@@ -34,7 +34,7 @@ jobs:
       - name: Setup Huawei HarmonyOS Command Line Tools
         uses: wm-develop/setup-ohos@v3
         with:
-          version: 26.0.0.821
+          version: 26.0.0.621
           cache: true
 
       - name: Verify toolchain
