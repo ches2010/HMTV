@@ -12,7 +12,7 @@ export class PlayerEngine {
 
  async prepare(url: string, headers: Record<string, string>, surfaceId: string): Promise<void> {
     this.surfaceId = surfaceId;
-    const p: media.AVPlayer = media.createAVPlayer();
+    const p: media.AVPlayer = await media.createAVPlayer();
     this.player = p;
     p.on('stateChange', (state: string) => {
       hilog.info(0x0000, 'TVBoxPort', 'player state: %{public}s', state);
@@ -25,8 +25,8 @@ export class PlayerEngine {
       if (this.onError) this.onError(err.code + ' ' + err.message);
     });
     if (surfaceId.length > 0) {
-      // setDisplaySurface 需在 prepare 之前；若本地 SDK 签名带 callback，请按 IDE 提示补第二参数。
-      p.setDisplaySurface(surfaceId);
+      // surfaceId 必须在 initialized 状态（prepare 之前）设置
+      p.surfaceId = surfaceId;
     }
     if (Object.keys(headers).length > 0) {
       const source: media.MediaSource = media.createMediaSourceWithUrl(url, headers);

@@ -21,7 +21,7 @@ export class ConfigStore {
   }
 
   async getConfigUrl(): Promise<string> {
-    return this.pref ? (this.pref.get(KEY_CONFIG_URL, '') as string) : '';
+    return this.pref ? (await this.pref.get(KEY_CONFIG_URL, '') as string) : '';
   }
 
   async setConfigUrl(url: string): Promise<void> {
@@ -39,7 +39,7 @@ export class ConfigStore {
   }
 
   async getRawConfig(): Promise<string> {
-    return this.pref ? (this.pref.get(KEY_RAW_JSON, '') as string) : '';
+    return this.pref ? (await this.pref.get(KEY_RAW_JSON, '') as string) : '';
   }
 
   parseConfig(json: string): SiteConfig {

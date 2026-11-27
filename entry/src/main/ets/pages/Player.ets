@@ -1,5 +1,4 @@
 import { router } from '@kit.ArkUI';
-import { XComponentController } from '@kit.ArkUI';
 import { PlayerEngine } from '../player/PlayerEngine';
 
 @Entry

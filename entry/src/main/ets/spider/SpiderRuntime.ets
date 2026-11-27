@@ -4,7 +4,7 @@ import { JsBridge } from './JsBridge';
 // 承载 JS Spider 的 ArkWeb 运行时单例。Web 组件需挂载在页面中（宽高 1px 即可）。
 export class SpiderRuntime {
   private static instance_: SpiderRuntime = new SpiderRuntime();
- readonly controller: webview.WebviewController = webview.createWebviewController();
+ readonly controller: webview.WebviewController = new webview.WebviewController();
   readonly bridge: JsBridge = new JsBridge();
  private pageReady_: boolean = false;
  private registered_: boolean = false;

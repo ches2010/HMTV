@@ -17,7 +17,9 @@ export class JsSpider implements SpiderContract {
   homeContent(filter: boolean): Promise<string> { return this.invoke('homeContent', [filter]); }
   homeVideoContent(): Promise<string> { return this.invoke('homeVideoContent', []); }
   categoryContent(tid: string, pg: string, filter: boolean, extend: Map<string, string>): Promise<string> {
-    return this.invoke('categoryContent', [tid, pg, filter, Object.fromEntries(extend)]);
+    const plain: Record<string, string> = {};
+    extend.forEach((value: string, key: string) => { plain[key] = value; });
+    return this.invoke('categoryContent', [tid, pg, filter, plain]);
   }
   detailContent(ids: string[]): Promise<string> { return this.invoke('detailContent', [ids]); }
   searchContent(key: string, quick: boolean, pg?: string): Promise<string> {
