@@ -27,7 +27,7 @@ export class HttpSpider implements SpiderContract {
     }
   }
 
- homeContent(filter: boolean): Promise<string> { return this.get('ac=home'); }
+ homeContent(filter: boolean): Promise<string> { return this.get('ac=videolist&pg=1'); }
   homeVideoContent(): Promise<string> { return this.get('ac=videolist&pg=1'); }
   categoryContent(tid: string, pg: string, filter: boolean, extend: Map<string, string>): Promise<string> {
     return this.get('ac=videolist&t=' + encodeURIComponent(tid) + '&pg=' + encodeURIComponent(pg));

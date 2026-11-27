@@ -22,13 +22,22 @@ struct Home {
   private store: ConfigStore = ConfigStore.getInstance();
   private runnerController: webview.WebviewController = SpiderRuntime.getInstance().controller;
 
+ private isJarSite(site: SiteBean): boolean {
+    return site.type === 3 && !site.api.startsWith('http://') && !site.api.startsWith('https://');
+  }
+
  async aboutToAppear(): Promise<void> {
     await this.store.init(this.getUIContext().getHostContext()!);
     const raw = await this.store.getRawConfig();
     networkPolicy.configure(raw);
     const cfg = this.store.parseConfig(raw);
     this.sites = cfg.sites || [];
-    if (this.sites.length > 0) this.loadHome();
+    if (this.sites.length > 0) {
+      for (let i = 0; i < this.sites.length; i++) {
+        if (!this.isJarSite(this.sites[i])) { this.selected = i; break; }
+      }
+      this.loadHome();
+    }
  }
 
  private currentSite(): SiteBean | undefined {
@@ -38,6 +47,10 @@ struct Home {
  private async currentSpider() {
     const site = this.currentSite();
     if (!site) return undefined;
+    if (this.isJarSite(site)) {
+      this.status = '该站点是 JAR 爬虫（' + site.api + '），鸿蒙无法运行；请选 type=0/1 的站点';
+      return undefined;
+    }
     const sp = SpiderFactory.create(site);
     if (sp instanceof JsSpider) {
       const req = http.createHttp();
@@ -110,7 +123,7 @@ struct Home {
       Scroll() {
         Row() {
           ForEach(this.sites, (s: SiteBean, i: number) => {
-            Button(s.name).onClick(() => { this.selected = i; this.loadHome(); })
+            Button(s.name + (this.isJarSite(s) ? '(JAR×)' : '')).onClick(() => { this.selected = i; this.loadHome(); })
               .margin({ right: 8 })
               .backgroundColor(i === this.selected ? '#3179F5' : '#DDDDDD')
           })
